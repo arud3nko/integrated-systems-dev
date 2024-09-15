@@ -15,8 +15,8 @@ from app.lab1.neowise import NeowiseAPIClient
 router = APIRouter()
 
 
-@router.get("/asteroids/", response_model=list[AsteroidSchema])
-async def get_nearby_asteroids_list(
+@router.get("/parse-asteroids/", response_model=list[AsteroidSchema])
+async def parse_nearby_asteroids_list(
         request: Request,
         background_tasks: BackgroundTasks,
 ):

@@ -2,11 +2,17 @@
 
 from contextlib import asynccontextmanager
 
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import FastAPI
 
-from app import get_lab_conf
+from app import get_lab_conf, get_app_conf
 
-from app.api.lab1 import lab1_asteroids_router
+from app.middlewares import BearerTokenAuthorizationMiddleware
+
+from app.api.endpoints import (
+    lab1,
+    lab2,
+)
 from app.lab1.neowise import NeowiseAPIClient
 
 
@@ -27,4 +33,12 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(lab1_asteroids_router, prefix="/lab1")
+app_conf = get_app_conf()
+
+app.include_router(lab1)
+app.include_router(lab2)
+
+bearer_auth_middleware = BearerTokenAuthorizationMiddleware(token=app_conf.TOKEN)
+
+app.add_middleware(BaseHTTPMiddleware, dispatch=bearer_auth_middleware)
+

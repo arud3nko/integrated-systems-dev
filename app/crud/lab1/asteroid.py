@@ -1,5 +1,7 @@
 """This module contains `Asteroid` CRUD"""
+
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select, and_
 
 from loguru import logger
 
@@ -28,3 +30,19 @@ class AsteroidCRUD(BaseCRUD[Asteroid, AsteroidSchema]):
 
         for asteroid in obj_in:
             await self.create(obj_in=asteroid, db_session=db_session)
+
+    @staticmethod
+    async def get_filtered(
+            *,
+            obj: AsteroidSchema,
+            db_session: AsyncSession
+    ) -> ModelT | None:
+
+        filter_clauses = [getattr(Asteroid, field_name) == getattr(obj, field_name)
+                          for field_name, _ in obj.dict(exclude_none=True).items()]
+
+        query = select(Asteroid).where(and_(*filter_clauses))
+
+        response = await db_session.execute(query)
+
+        return response.scalars().all()

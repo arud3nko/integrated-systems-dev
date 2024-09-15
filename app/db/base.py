@@ -1,6 +1,8 @@
 """This module provides `BaseSQLModel` class"""
 
-from sqlmodel import SQLModel
+import datetime
+
+from sqlmodel import SQLModel, Field
 
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -12,3 +14,11 @@ class BaseSQLModel(SQLModel):
     def __tablename__(cls) -> str:
         """Sets __tablename__ attribute using lower class name and tables prefix"""
         return cls.__name__.lower()
+
+    created_at: datetime.datetime = Field(
+        default_factory=datetime.datetime.now,
+    )
+
+    updated_at: datetime.datetime = Field(
+            default_factory=datetime.datetime.now,
+        )
