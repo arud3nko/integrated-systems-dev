@@ -34,6 +34,13 @@ class BaseSettingsYAML(BaseSettings):
         return (YamlConfigSettingsSource(settings_cls),)
 
 
+class LabConfigurations(BaseSettingsYAML):
+    """Labs common configurations class"""
+    model_config = SettingsConfigDict(yaml_file="lab_configurations.yaml", yaml_file_encoding="utf-8")
+
+    neowise_api_url: str
+
+
 class PostgresConfiguration(BaseSettings):
     """Postgres configuration class"""
     model_config = SettingsConfigDict(env_file='postgres.env', env_file_encoding='utf-8')
@@ -69,3 +76,9 @@ class PostgresConfiguration(BaseSettings):
 def get_postgres_conf() -> PostgresConfiguration:
     """Provides PostgresConfiguration instance"""
     return PostgresConfiguration()  # type: ignore
+
+
+@lru_cache
+def get_lab_conf() -> LabConfigurations:
+    """Provides LabConfigurations instance"""
+    return LabConfigurations()  # type: ignore
