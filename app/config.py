@@ -41,6 +41,13 @@ class LabConfigurations(BaseSettingsYAML):
     neowise_api_url: str
 
 
+class AppConfiguration(BaseSettings):
+    """App configuration class"""
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
+
+    TOKEN: str
+
+
 class PostgresConfiguration(BaseSettings):
     """Postgres configuration class"""
     model_config = SettingsConfigDict(env_file='postgres.env', env_file_encoding='utf-8')
@@ -76,6 +83,12 @@ class PostgresConfiguration(BaseSettings):
 def get_postgres_conf() -> PostgresConfiguration:
     """Provides PostgresConfiguration instance"""
     return PostgresConfiguration()  # type: ignore
+
+
+@lru_cache
+def get_app_conf() -> AppConfiguration:
+    """Provides AppConfiguration instance"""
+    return AppConfiguration()  # type: ignore
 
 
 @lru_cache
