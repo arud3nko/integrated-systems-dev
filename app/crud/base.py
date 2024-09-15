@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, select
 
 from pydantic import BaseModel
 
@@ -21,6 +21,34 @@ class BaseCRUD(Generic[ModelT, SchemaT]):
     def __init__(self, model: type[ModelT]):
         """Initialize CRUD class"""
         self.model = model
+
+    async def get(
+            self,
+            *,
+            db_session: AsyncSession
+    ) -> list[ModelT] | None:
+        """
+        This method reads the instances from the database
+
+        :param db_session: DB session
+        :return: Model instances
+        """
+        query = select(self.model)
+        response = await db_session.execute(query)
+
+        return response.scalars().all()
+
+    async def get_by_id(
+            self,
+            *,
+            obj_id: int,
+            db_session: AsyncSession
+    ) -> ModelT | None:
+        """Get object specified by `id` field"""
+        query = select(self.model).where(self.model.id == obj_id)
+        response = await db_session.execute(query)
+
+        return response.scalars().one()
 
     async def create(
             self,

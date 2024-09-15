@@ -6,7 +6,10 @@ from fastapi import FastAPI
 
 from app import get_lab_conf
 
-from app.api.lab1 import lab1_asteroids_router
+from app.api.endpoints import (
+    lab1,
+    lab2,
+)
 from app.lab1.neowise import NeowiseAPIClient
 
 
@@ -27,4 +30,5 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(lab1_asteroids_router, prefix="/lab1")
+app.include_router(lab1)
+app.include_router(lab2)
