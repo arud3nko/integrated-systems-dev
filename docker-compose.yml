@@ -1,0 +1,34 @@
+name: isd
+
+services:
+  isd-app-dev:
+    hostname: isd-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8081:8081
+    command: bash -c "uvicorn --host 0.0.0.0 --port 8081 app.main:app --reload"
+    volumes:
+      - ./:/isd
+    networks:
+      - isd-course
+
+  db:
+    container_name: isd-db
+    env_file:
+      - path: ./postgres.env
+        required: true
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - isd-course
+
+volumes:
+  postgres_data:
+
+networks:
+  isd-course:
+    name: isd-course
+    driver: bridge
