@@ -7,7 +7,7 @@ from fastapi import FastAPI
 
 from loguru import logger
 
-from app import get_app_conf
+from app import get_app_conf, get_lab_conf
 
 from app.middlewares import BearerTokenAuthorizationMiddleware
 
@@ -15,6 +15,8 @@ from app.api.endpoints import (
     lab1,
     lab2,
 )
+
+from app.kafka import AsteroidsKafkaProducer
 
 logger.add("logging.log")
 
@@ -27,7 +29,18 @@ async def lifespan(_app: FastAPI):
 
     logger.info("Starting app")
 
-    yield {}
+    lab_conf = get_lab_conf()
+
+    kafka_producer = AsteroidsKafkaProducer(
+        lab_conf.kafka_url,
+        lab_conf.kafka_topic,
+    )
+
+    await kafka_producer.start()
+
+    yield {
+        "kafka_producer": kafka_producer,
+    }
 
 
 app = FastAPI(lifespan=lifespan)

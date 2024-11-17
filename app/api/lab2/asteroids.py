@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from fastapi.requests import Request
+from fastapi.background import BackgroundTasks
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +12,7 @@ from sqlmodel import select
 from app.schemas.lab1 import AsteroidSchema
 from app.crud.lab1 import AsteroidCRUD
 from app.db.lab1 import Asteroid
+from app.kafka import AsteroidsKafkaProducer
 
 from app.api import get_db
 
@@ -82,15 +85,24 @@ async def get_asteroid(
 
 @router.post("/asteroids/", response_model=Asteroid)
 async def create_asteroid(
+        request: Request,
         asteroid: AsteroidSchema,
-        db_session: AsyncSession = Depends(get_db)
+        background_tasks: BackgroundTasks,
+        db_session: AsyncSession = Depends(get_db),
 ):
     """
     Create asteroid, specified by ID
 
+    :param request: Request
     :param asteroid: Asteroid data
     :param db_session: DB session
+    :param background_tasks: Background tasks handler
     """
+
     asteroid = await AsteroidCRUD().create(obj_in=asteroid, db_session=db_session)
+
+    kafka_producer: AsteroidsKafkaProducer = request.state.kafka_producer
+
+    background_tasks.add_task(kafka_producer.produce, asteroid)
 
     return asteroid

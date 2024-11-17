@@ -33,7 +33,7 @@ class AsteroidCRUD(BaseCRUD[Asteroid, AsteroidSchema]):
         query = select(Asteroid).where(Asteroid.designation == db_obj.designation)
 
         existing = await db_session.execute(query)
-        current = existing.scalars().one()
+        current = existing.scalars().first()
 
         if current:
             return await self.update(obj_current=current, obj_new=db_obj, db_session=db_session)

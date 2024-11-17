@@ -39,6 +39,8 @@ class LabConfigurations(BaseSettingsYAML):
     model_config = SettingsConfigDict(yaml_file="lab_configurations.yaml", yaml_file_encoding="utf-8")
 
     neowise_api_url: str
+    kafka_url: str
+    kafka_topic: str
 
 
 class AppConfiguration(BaseSettings):

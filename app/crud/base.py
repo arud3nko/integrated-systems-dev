@@ -48,7 +48,7 @@ class BaseCRUD(Generic[ModelT, SchemaT]):
         query = select(self.model).where(self.model.id == obj_id)
         response = await db_session.execute(query)
 
-        return response.scalars().one()
+        return response.scalars().first()
 
     async def create(
             self,

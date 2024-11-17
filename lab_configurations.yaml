@@ -1,1 +1,3 @@
 neowise_api_url: https://data.nasa.gov/resource/2vr3-k9wn.json
+kafka_url: kafka:9092
+kafka_topic: asteroids
