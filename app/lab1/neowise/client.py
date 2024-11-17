@@ -4,6 +4,8 @@ from httpx import AsyncClient
 
 from loguru import logger
 
+from pydantic import ValidationError
+
 from app.schemas.lab1 import AsteroidSchema
 
 
@@ -26,5 +28,8 @@ class NeowiseAPIClient(AsyncClient):
         response = await self.get(url=self.url)
 
         asteroids = response.json()
+
+        if not isinstance(asteroids, list):
+            raise ValidationError.from_exception_data("Asteroids list was not provided", [])
 
         return [AsteroidSchema(**asteroid_data) for asteroid_data in asteroids]

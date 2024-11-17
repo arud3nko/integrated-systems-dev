@@ -10,8 +10,8 @@ class Asteroid(BaseSQLModel, table=True):
 
     id: int | None = Field(primary_key=True, default=None)
 
-    designation: str
     discovery_date: str
+    designation: str = Field(nullable=False, unique=True)
     h_mag: float | None = Field(nullable=True)
     moid_au: float | None = Field(nullable=True)
     q_au_1: float | None = Field(nullable=True)

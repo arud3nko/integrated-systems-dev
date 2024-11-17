@@ -16,9 +16,11 @@ class BaseSQLModel(SQLModel):
         return cls.__name__.lower()
 
     created_at: datetime.datetime = Field(
-        default_factory=datetime.datetime.now,
+        default=datetime.datetime.now(),
+        nullable=False,
     )
 
     updated_at: datetime.datetime = Field(
             default_factory=datetime.datetime.now,
+            nullable=False,
         )

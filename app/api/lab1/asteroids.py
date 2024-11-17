@@ -1,8 +1,13 @@
 """This module provides Asteroids Data endpoint"""
 
+from json import JSONDecodeError
+
+from httpx import HTTPError
+
 from fastapi import APIRouter, BackgroundTasks, status
-from fastapi.requests import Request
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse
+
+from loguru import logger
 
 from pydantic import ValidationError
 
@@ -17,19 +22,37 @@ router = APIRouter()
 
 @router.get("/parse-asteroids/", response_model=list[AsteroidSchema])
 async def parse_nearby_asteroids_list(
-        request: Request,
+        path: str,
         background_tasks: BackgroundTasks,
 ):
     """Get asteroids list from API client & start background task to save them to DB"""
 
-    neowise_api_client: NeowiseAPIClient = request.state.neowise_api_client
+    logger.info(f"Requested parsing {path}")
+
+    neowise_api_client = NeowiseAPIClient(path)
 
     try:
         asteroids = await neowise_api_client.get_asteroids()
-    except ValidationError:
-        return Response(status_code=status.HTTP_400_BAD_REQUEST, content="Incompatible schema")
+    except JSONDecodeError as exc:
+        logger.error(exc)
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"err": "Invalid JSON"})
+    except ValidationError as exc:
+        logger.error(exc)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"err": "Incompatible schema", "detail": exc.title})
+    except HTTPError as exc:
+        logger.error(exc)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"err": "HTTP client raised exception", "detail": str(exc)}
+        )
+
+    logger.success(f"Successfully parsed asteroids")
 
     async with SessionLocal() as db_session:
         background_tasks.add_task(AsteroidCRUD().create_from_list, obj_in=asteroids, db_session=db_session)
+
+    logger.success(f"Successfully saved to database")
 
     return asteroids
